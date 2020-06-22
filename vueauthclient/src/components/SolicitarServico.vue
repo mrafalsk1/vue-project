@@ -1,6 +1,8 @@
 <template>
   <div>
-    <cabecalho />
+    <div>
+      <cabecalho />
+    </div>
     <div class="row">
       <div class="col-2">
         <select v-model="selected" @change="listar" class="form-control">
@@ -16,21 +18,23 @@
         <vs-popup
           classContent="popup-example"
           title="Endereço"
-          class='row'
+          class="row"
           :active.sync="popupActivo2"
         >
-        <form v-on:submit="cadastrar" >
-          <input class="inputx form form-control" placeholder="Endereço" v-model="endereco" />
-          <input class="inputx form form-control" placeholder="Contato" v-model="contato" />
-          <input type='hidden' :value="pId">
-          <button type='submit' class='btn btn-success pop'>Confirmar</button>
-          <button  @click="popupActivo2=false" class='btn btn-danger pop'>Cancelar</button>
-        </form>
+          <form v-on:submit="cadastrar">
+            <input class="inputx form form-control" placeholder="Endereço" v-model="endereco" />
+            <input class="inputx form form-control" placeholder="Contato" v-model="contato" />
+            <input class='inputx form form-control' placeholder="Descrição" v-model="descricao">
+            <input type="hidden" :value="pId" />
+            <button type="submit" class="btn btn-success pop">Confirmar</button>
+            <button @click="popupActivo2=false" class="btn btn-danger pop">Cancelar</button>
+          </form>
         </vs-popup>
       </div>
       <div class="col-sm-2 card card-stats" v-for="p in prestadores" v-bind:key="p._id">
         <div class="card-body">
           <div class="divider">
+            <h4>{{ selected.nome }}</h4>
             <span class="card-subtitle">Nome: {{ p.nome }}</span>
             <br />
             <span class="card-subtitle">Cnpj: {{ p.cnpj }}</span>
@@ -38,7 +42,11 @@
             <span class="card-subtitle last">Telefone: {{ p.telefone }}</span>
           </div>
           <div class="btn">
-            <button type="button" @click="popupActivo2=true;pId=p._id" class="btn btn-success">Contratar</button>
+            <button
+              type="button"
+              @click="popupActivo2=true;pId=p._id"
+              class="btn btn-success"
+            >Contratar</button>
           </div>
         </div>
       </div>
@@ -49,7 +57,7 @@
       <script src="https://unpkg.com/vue/dist/vue.js"></script>
       <script src="https://unpkg.com/vuesax"></script>
 <script>
-import header from "./header";
+import headerUser from "./headerUser";
 import http from "../services/http";
 import dropdown from "vue-dropdowns";
 import "bootstrap";
@@ -63,13 +71,35 @@ export default {
   created() {
     http.instance.get("/categorias").then(response => {
       console.log(response.data.usuario);
-      this.user = response.data.usuario
+      this.user = response.data.usuario;
       for (let index = 0; index < response.data.categorias.length; index++) {
         const element = response.data.categorias[index];
         // <tr v-for="usuario in usuarios" v-bind:key="usuario._id">
         this.$set(this.options, index, element);
       }
     });
+    if (this.$route.query.categoria) {
+      let data = {
+        nome: this.$route.query.categoria
+      }
+      this.selected = data;
+      
+      http.instance
+        .get("/prestador", {
+          params: {
+            categoria: this.selected.nome
+          }
+        })
+        .then(response => {
+          console.log(response);
+          this.user = response.data.usuario._id;
+          for (let index = 0; index < response.data.response.length; index++) {
+            const element = response.data.response[index];
+            // <tr v-for="usuario in usuarios" v-bind:key="usuario._id">
+            this.$set(this.prestadores, index, element);
+          }
+        });
+    }
   },
   data: function() {
     return {
@@ -78,10 +108,11 @@ export default {
       prestadores: [],
       popupActivo2: false,
       value1: "",
-      pId: '',
-      endereco: '',
-      user: '',
-      contato: ''
+      pId: "",
+      endereco: "",
+      user: "",
+      contato: "",
+      descricao:""
     };
   },
   methods: {
@@ -100,7 +131,7 @@ export default {
         })
         .then(response => {
           console.log(response);
-          this.user = response.data.usuario._id
+          this.user = response.data.usuario._id;
           for (let index = 0; index < response.data.response.length; index++) {
             const element = response.data.response[index];
             // <tr v-for="usuario in usuarios" v-bind:key="usuario._id">
@@ -114,26 +145,40 @@ export default {
       this.popupActivo2 = false;
       console.log(this.user);
       let data = {
-        'usuario_id':this.user,
-        'prestador_id':this.pId,
-        'endereco':this.endereco,
-        'contato':this.contato
-      }
+        usuario_id: this.user,
+        prestador_id: this.pId,
+        endereco: this.endereco,
+        contato: this.contato,
+        descricao: this.descricao
+      };
       console.log(data);
-      
-      http.instance.post('/servico',data).then(response => {
-        console.log(response);
-        
-      }).catch(error => {
-        console.log(error);
-        
-      })
-      
+
+      http.instance
+        .post("/servico", data)
+        .then(response => {
+          var x = document.getElementById("snackbar");
+          x.innerHTML = "Serviço solicitado";
+          console.log(response);
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        })
+        .catch(error => {
+          console.log("bom ida");
+
+          var x = document.getElementById("snackbar");
+          x.innerHTML = error.response.data.message;
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        });
     }
   },
   components: {
     "v-select": vSelect,
-    cabecalho: header,
+    cabecalho: headerUser,
     dropdown: dropdown,
     "vue-dropdown": VueDropdown
   }

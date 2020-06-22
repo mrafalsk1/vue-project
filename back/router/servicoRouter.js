@@ -3,6 +3,7 @@ const express = require('express'),
     servCtrl = require('../controller/servicoController')
 
     router.post('/',servCtrl.salvar)
+    router.get('/',servCtrl.listar)
 
 module.exports = router
 //localhost:3000/login

@@ -9,7 +9,12 @@
 import router from "../router";
 
 export default {
-  name: "topbarguest"
+  name: "topbarguest",
+  data: function() {
+    return {
+      user: ''
+    }
+  }
 };
 </script>
 <style scoped>

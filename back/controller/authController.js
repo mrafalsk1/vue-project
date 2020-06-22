@@ -28,6 +28,7 @@ exports.login = (req, res, next) => {
             
             res.json({
                 usuario: {
+                    id: usuario._id,
                     nome: usuario.nome,
                     email: usuario.email,
                     roles: usuario.roles
