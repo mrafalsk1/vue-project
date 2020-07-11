@@ -8,7 +8,11 @@ let ServicoModel = new Schema({
     contato:{type: String, required: true},
     data_inicio:{type: Date, default: Date.now},
     data_fim:{type: Date},
-    descricao:{type: String, required:true}
+    data_conf:{type: Date},
+    descricao:{type: String, required:true},
+    avaliacao: { type: Number, set: function (v) { return Math.round(v) ;}},
+    valor: { type: Number, set: function (v) { return Math.round(v) ;}},
+    assunto:{type: String, required: true}
 }, {collection: 'servicos', versionKey: false}) 
 
 module.exports = mongoose.model('Servico', ServicoModel)

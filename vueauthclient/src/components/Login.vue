@@ -24,7 +24,7 @@
         <div class="row under">
           <div class="col-9" style="padding-right:0px;">
             <router-link
-              to="/cadastro"
+              to="/cadastro/usuario"
               style="font-size:12px;margin:0 auto;"
             >Cadastre-se como Usuário</router-link>
             <br />
@@ -52,7 +52,12 @@ import topbarguest from "./Topbarguest";
 export default {
   name: "Login",
   created() {
-    storage.remove();
+    console.log(storage.getItem("user_nome"));
+
+    storage.remove("user_role");
+    storage.remove("user_nome");
+    storage.remove("token");
+    console.log(storage.getItem("user_nome"));
   },
   data: function() {
     return {
@@ -78,17 +83,20 @@ export default {
           .then(response => {
             console.log("Logged in" + response.data.usuario);
             storage.setToken(response.data.token);
+            console.log(response);
+
             storage.setItem("user_id", response.data.usuario.id);
-            storage.setItem("user_nome", response.data.usuario.nome);
+            let nome = response.data.usuario.nome.split(" ");
+            storage.setItem("user_nome", nome[0]);
             storage.setItem("role", response.data.usuario.roles);
             console.log(storage.getToken("token"));
             http.setHeader();
             router.push("/dashboard");
           })
           .catch(errors => {
-            console.log("Cannot log in" + errors);
+            console.log(errors);
             var x = document.getElementById("snackbar");
-            x.innerHTML = errors.response.data.message;
+            x.innerHTML = errors.data.message;
             x.className = "show";
             setTimeout(function() {
               x.className = x.className.replace("show", "");
@@ -97,10 +105,6 @@ export default {
       };
       login();
     },
-    redirect: e => {
-      e.preventDefault();
-      router.push("Cadastro");
-    }
   }
 };
 </script>
@@ -117,10 +121,6 @@ export default {
 }
 input {
   margin: 0 auto;
-}
-body {
-  background-image: url("http://127.0.0.1:8887/login.png");
-  background-repeat: no-repeat, repeat;
 }
 .text-center {
   text-align: center;

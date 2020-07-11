@@ -8,15 +8,15 @@ exports.login = (req, res, next) => {
     let { email, senha } = req.body
     console.log(email, senha);
 
-    if (!email || !senha) return res.status(401).send({message:'Informe email/senha'});
+    if (!email || !senha) return res.status(400).send({message:'Informe email/senha'});
     //busca usuário
     Usuario.findOne({ email }, (error, usuario) => {
         if (error) return next(error)
-        if (!usuario) return res.status(401).send({message:'Usuário ou senha inválidos'});
+        if (!usuario) return res.status(400).send({message:'Usuário ou senha inválidos'});
 
             // VERIFICA HASH SENHA
         bcrypt.compare(senha, usuario.senha, (err, match) => {
-            if (!match) return res.status(401).send({message:'Usuário ou senha inválidos'});
+            if (!match) return res.status(400).send({message:'Usuário ou senha inválidos'});
              //GERAR TOKEN
             const token = jwt.sign({
                 usuario: {
@@ -45,13 +45,18 @@ exports.cadastrar = (req, res, next) => {
     let u = req.body
 
     //console.log('Usuario :'+res.locals.usuario._id);
-    
+    console.log(u)
+    if(!u.email || !u.nome || !u.telefone) return res.status(400).send({message:"falta cosa"})
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(u.senha, salt, (err, hash) => {
-            if (err) return res.status(500).send({message:"erro"})
+            if (err) return res.status(500).send({message:"Erro ao cadastrar"})
+            console.log(err);
+            
             u.senha = hash
             Usuario.create(req.body, (error, usuario) => {
-                if (error) return res.status(500).send({message:'erro'})
+                console.log(error);
+                
+                if (error) return res.status(500).send({message:'Email inválido/em uso '})
                 res.json(usuario)
             })
         })
@@ -72,7 +77,7 @@ exports.cadastrarPrestador = (req,res,next) => {
     
     let p = req.body
     console.log(p);
-    if (!p.email || !p.senha || !p.servicos || !p.cnpj || !p.servicos[0]) return res.status(401).send({message:'Encha o tanque'});
+    if (!p.email || !p.senha || !p.servicos || !p.cnpj || !p.servicos[0]) return res.status(400).send({message:'Encha o tanque'});
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(p.senha, salt, (err, hash) => {
             if (err) return res.status(500).send({message:"erro"})

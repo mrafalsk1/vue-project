@@ -7,8 +7,8 @@ class Storage {
     getToken(key) {
         return localStorage.getItem(key)
     }
-    remove() {
-        localStorage.removeItem('token')
+    remove(key) {
+        localStorage.removeItem(key)
     }
     setItem(key,item) {
         localStorage.setItem(key,item)

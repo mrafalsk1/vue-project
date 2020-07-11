@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <form v-on:submit="cadastrar" autocomplete="off">
+      <form v-on:submit.prevent="cadastrar" autocomplete="off">
         <div class="row">
           <div class="col-12 text-center">
             <h2 class="white">Cadastro</h2>
@@ -25,12 +25,12 @@
             />
           </div>
           <div class="col-12 text-center">
-            <input
-              type="text"
-              v-model="telefone"
+            <the-mask
               placeholder="Telefone"
+              :masked="true"
+              v-model="telefone"
               class="form form-control"
-              id="telefone"
+              :mask="['(##) ####-####', '(##) #####-####']"
             />
           </div>
           <div class="col-12 text-center">
@@ -79,44 +79,47 @@ export default {
     };
   },
   methods: {
-    cadastrar: e => {
-      e.preventDefault();
+    cadastrar: function() {
+      if (this.senha != this.senhaconfirm) {
+        var x = document.getElementById("snackbar");
+        x.innerHTML = "As senhas devem ser as mesmas";
+        x.className = "show";
+        setTimeout(function() {
+          x.className = x.className.replace("show", "");
+        }, 3000);
+        return;
+      }
 
-      let cadastrar = () => {
-        if (senha.value != senhaconfirm.value) {
+      let data = {
+        email: this.email,
+        senha: this.senha,
+        nome: this.nome,
+        roles: ["user"],
+        telefone: this.telefone
+      };
+      console.log("alo");
+
+      axios
+        .post("/cadastrar", data)
+        .then(response => {
+          console.log(response);
           var x = document.getElementById("snackbar");
-          x.innerHTML = "As senhas devem ser as mesmas";
+          x.innerHTML = "Cadastrado";
           x.className = "show";
           setTimeout(function() {
             x.className = x.className.replace("show", "");
           }, 3000);
-          return;
-        }
-        let data = {
-          email: email.value,
-          senha: senha.value,
-          nome: nome.value,
-          roles: ["user"]
-        };
-        console.log("alo");
-
-        axios
-          .post("/cadastrar", data)
-          .then(response => {
-            console.log(response);
-            router.push("/");
-          })
-          .catch(errors => {
-            console.log("Cannot log in" + errors.response.data.message);
-            var x = document.getElementById("snackbar");
-            x.innerHTML = errors.response.data.message;
-            x.className = "show";
-            setTimeout(function() {
-              x.className = x.className.replace("show", "");
-            }, 3000);
-          });
-      };
-      cadastrar();
+          router.push("/");
+        })
+        .catch(errors => {
+          console.log("Cannot log in" + errors.response.data.message);
+          var x = document.getElementById("snackbar");
+          x.innerHTML = errors.response.data.message;
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        });
     }
   }
 };

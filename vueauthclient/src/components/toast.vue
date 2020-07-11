@@ -1,39 +1,14 @@
 <template>
   <div id="app">
-    <router-view />
     <div id="snackbar" class="snackbar" v-bind="snack">alo</div>
   </div>
 </template>
-
 <script>
-import "bootstrap/dist/css/bootstrap.css";
-import "font-awesome/css/font-awesome.css";
-import router from "./router";
-import axios from "axios";
-import storage from "./services/storage";
-import http from "./services/http";
-
 export default {
-  name: "App",
-  data: function() {
-    return {
-      snack: null
-    };
-  }
-};
+    name: 'snack'
+}
 </script>
-
 <style>
-#app {
-  font-family: "Lucida Console", Courier, monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-body {
-  background-color: #030c20;
-}
 #snackbar {
   visibility: hidden;
   /* Hidden by default. Visible on click */

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <form v-on:submit="cadastrar" autocomplete="off">
+      <form v-on:submit.prevent="cadastrar" autocomplete="off">
         <div class="margin-10">
           <div class="col-12 text-center">
             <h2 class="white">Cadastro</h2>
@@ -25,21 +25,21 @@
             />
           </div>
           <div class="col-12 text-center">
-            <input
-              v-model="cnpj"
-              type="text"
-              placeholder="CNPJ"
-              id="cnpj"
+            <the-mask
               class="form form-control"
+              placeholder="CNPJ"
+              v-model="cnpj"
+              :masked="true"
+              :mask="['###.###.###-##', '##.###.###/####-##']"
             />
           </div>
           <div class="col-12 text-center">
-            <input
-              type="text"
-              v-model="telefone"
+            <the-mask
               placeholder="Telefone"
+              v-model="telefone"
+              :masked="true"
               class="form form-control"
-              id="telefone"
+              :mask="['(##) ####-####', '(##) #####-####']"
             />
           </div>
           <div class="col-12 text-center">
@@ -63,7 +63,7 @@
           <div id="example-3">
             <label>Assinale os serviços prestados</label>
             <br />
-            <div class="row">
+            <div class="row" style="text-align:end">
               <div class="col-2" v-for="{nome,_id} in categorias" v-bind:key="_id">
                 <label style>{{ nome }}</label>
                 <input
@@ -96,26 +96,22 @@ export default {
   name: "Cadastro",
   created() {
     http.instance
-      .get("/categorias", {})
+      .get("/categorias")
       .then(response => {
-        if (response.status == 401) {
-          console.log("oshi");
-          route.push("/");
-        }
         console.log(response.data);
-        console.log(response.data[0]);
+        console.log(response.data.categorias[0]);
+        console.log(response.data.categorias.length);
 
-        for (let index = 0; index < response.data.length; index++) {
-          const element = response.data[index];
+        for (let index = 0; index < response.data.categorias.length; index++) {
+          const element = response.data.categorias[index];
           // <tr v-for="usuario in usuarios" v-bind:key="usuario._id">
+          console.log(element);
+
           this.$set(this.categorias, index, element);
         }
         console.log(this.categorias);
       })
       .catch(errors => {
-        if (errors.response.status == 401) {
-          router.push("/");
-        }
         console.log(errors);
       });
   },
@@ -151,18 +147,15 @@ export default {
         roles: ["prest"],
         telefone: this.telefone
       };
-      console.log(data);
-
       http.instance
         .post("/cadastrar/prestador", data)
         .then(response => {
-          console.log(response);
           router.push("/");
         })
         .catch(errors => {
-          console.log("Cannot log in" + errors.response.data.message);
+          console.log("Cannot log in" + errors.data.message);
           var x = document.getElementById("snackbar");
-          x.innerHTML = errors.response.data.message;
+          x.innerHTML = 'Falta coisa ai';
           x.className = "show";
           setTimeout(function() {
             x.className = x.className.replace("show", "");

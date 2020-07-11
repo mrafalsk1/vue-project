@@ -11,7 +11,7 @@
     </div>
     <div v-if="role == 'user'" class="container-fluid">
       <div class="titulo">
-        <h1>Serviços</h1>
+        <h1>Categorias</h1>
       </div>
       <div class="row presta container">
         <div
@@ -36,13 +36,14 @@
         <h1>Serviços Pendentes</h1>
       </div>
       <div class="row presta container">
-        <div v-for="servico in servicos" v-bind:key="servico._id" class="col-xl=-2 col-md6 esp">
+        <div v-for="(servico,i) in servicos" v-bind:key="servico._id" class="col-xl=-2 col-md6 esp mar">
           <div class="card card-stats prest">
             <div class="card-body">
               <div
                 @click="expandir(servico._id)"
                 style="border-bottom:1px solid #bbbbbb80;padding-bottom:1.25rem"
               >
+                <h3>{{ servico.assunto }}</h3>
                 <span class="txt">Contato: {{ servico.contato }}</span>
                 <br />
                 <span class="txt">Endereco: {{ servico.endereco }}</span>
@@ -53,8 +54,16 @@
                 <br />
               </div>
               <div style="padding-top:1.25rem">
-                <button type="submit" class="btn btn-success pop">Aceitar</button>
-                <button class="btn btn-danger pop">Recusar</button>
+                <button
+                  type="button"
+                  @click="aceitar(servico._id,i)"
+                  class="btn btn-success pop"
+                >Aceitar</button>
+                <button
+                  type="button"
+                  class="btn btn-danger pop"
+                  @click="recusar(servico._id,i)"
+                >Recusar</button>
               </div>
             </div>
           </div>
@@ -76,11 +85,19 @@
         </div>
       </div>
     </div>
+    <div class="container" style="display:flex;justify-content:center;">
+      <div v-if="!servicos[0] && role == 'prest'" style="margin:auto 0;color:white;width:45%;">
+        <div class="card card-stats prest" style="background-color:red">
+          <div class="card-body">Não há Nenhum Serviço Pendente</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
       <script src="https://unpkg.com/vue/dist/vue.js"></script>
       <script src="https://unpkg.com/vuesax"></script>
 <script>
+import "font-awesome/css/font-awesome.css";
 import router from "../router";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.css";
@@ -95,7 +112,11 @@ import "vuesax/dist/vuesax.css";
 axios.defaults.baseURL = "http://localhost:3000";
 export default {
   created() {
+    console.log(this.snack);
+
     console.log("alo2");
+    console.log(storage.getItem("user_nome"));
+
     let role = storage.getItem("role");
     console.log(role);
     this.role = role;
@@ -140,7 +161,7 @@ export default {
           }
         });
     }
-    if ((role = "prest")) {
+    if (role == "prest") {
       http.instance
         .get("/servico", {
           params: {
@@ -176,7 +197,8 @@ export default {
       popupActivo2: false,
       expand: false,
       popup: "",
-      text: null
+      text: null,
+      idservico: ""
     };
   },
   methods: {
@@ -193,8 +215,17 @@ export default {
         if (element._id == id) {
           this.text = this.$refs.popup.innerHTML;
           console.log(element);
-          this.text = '<h6 class="lbl"><span class="label label-default lbl">Endereço:</span></h6><input name="endereco" class="form-control" value='+element.endereco+' readonly><h6 class="lbl"><span class="label label-default lbl">Contato:</span></h6><input class="form-control" value='+element.contato+' readonly><h6 class="lbl"><span class="label label-default lbl">Data:</span></h6><input class="form-control" value='+element.data_inicio+' readonly><h6 class="lbl"><span class="label label-default lbl">Descrição:</span></h6><textarea class="form-control" id="exampleFormControlTextarea1" cols="80" rows="3" readonly>'+element.descricao+'</textarea>'
-
+                  this.text =
+            '<h6 class="lbl"><span class="label label-default lbl">Assunto:</span></h6><textarea name="assunto" rows="1" class="form-control" readonly>' + element.assunto + "</textarea>" +
+            '<h6 class="lbl"><span class="label label-default lbl">Endereço:</span></h6><input name="endereco" class="form-control" value=' +
+            element.endereco +
+            ' readonly><h6 class="lbl"><span class="label label-default lbl">Contato:</span></h6><input class="form-control" value=' +
+            element.contato +
+            ' readonly><h6 class="lbl"><span class="label label-default lbl">Data:</span></h6><input class="form-control" value=' +
+            element.data_inicio +
+            ' readonly><h6 class="lbl"><span class="label label-default lbl">Descrição:</span></h6><textarea class="form-control" id="exampleFormControlTextarea1" cols="80" rows="3" readonly>' +
+            element.descricao +
+            "</textarea>";
         }
       }
       console.log(this.$refs.popup);
@@ -204,6 +235,57 @@ export default {
       console.log("alo");
 
       router.push("/prestadores");
+    },
+    aceitar(id, i) {
+      console.log();
+      let d = new Date();
+      let data = {
+        id: id,
+        data_conf: d
+      };
+      http.instance
+        .patch("/servico/aceitar", {
+          data
+        })
+        .then(response => {
+          console.log(response);
+          this.servicos.splice(i, 1);
+          var x = document.getElementById("snackbar");
+          x.innerHTML = "Serviço Aceito";
+          console.log(response);
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        })
+        .catch(error => {
+          console.log();
+        });
+    },
+    recusar(id,i) {
+      console.log(id);
+      let d = new Date();
+      let data = {
+        id: id
+      };
+      http.instance
+        .delete("/servico/recusar", {
+          data
+        })
+        .then(response => {
+          console.log(response);
+          this.servicos.splice(i, 1);
+          var x = document.getElementById("snackbar");
+          x.innerHTML = "Serviço Removido";
+          console.log(response);
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        })
+        .catch(error => {
+          console.log();
+        });
     }
   },
   components: {
@@ -213,17 +295,20 @@ export default {
   }
 };
 </script>
-<style>
+<style scoped>
 body {
   background-color: white;
 }
 .esp {
   margin-bottom: 20px;
-  margin-right: 50px;
+}
+.mar {
+  margin-right: 4%;
 }
 .txt {
   overflow: hidden;
   white-space: nowrap;
+  margin: 15px;
 }
 .card {
   margin-right: 1%;
@@ -242,7 +327,10 @@ body {
   overflow: hidden;
 }
 .lbl {
-  margin-top:5px;
+  margin-top: 5px;
+}
+a {
+  text-decoration: none;
 }
 .card-body {
   padding: 0;

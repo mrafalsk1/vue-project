@@ -53,15 +53,22 @@ export default {
         .post("/categoria", data)
         .then(response => {
           console.log(response);
+          var x = document.getElementById("snackbar");
+          x.innerHTML = "Cadastrada";
+          x.className = "show";
+          setTimeout(function() {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+          this.nome = '';
         })
         .catch(error => {
           var x = document.getElementById("snackbar");
-           x.innerHTML = "Sem permissão";
+          x.innerHTML = "Sem permissão";
           if (error.response.status == 401) {
-            x.innerHTML = 'Unauthorized'
+            x.innerHTML = "Unauthorized";
             router.push("/");
           }
-         
+
           x.className = "show";
           setTimeout(function() {
             x.className = x.className.replace("show", "");

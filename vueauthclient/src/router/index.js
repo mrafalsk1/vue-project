@@ -7,6 +7,8 @@ import Prestadores from '@/components/Prestadores'
 import CadastroPrestador from '@/components/CadastroPrestador'
 import CadastroCategoria from '@/components/CadastroCategoria'
 import SolicitarServico from '@/components/SolicitarServico'
+import ServicoAceitos from '@/components/ServicosFinalizar'
+import Avaliar from '@/components/Avaliar'
 Vue.use(Router)
 
 export default new Router({
@@ -17,12 +19,17 @@ export default new Router({
       component: Login
     },
     {
+      path: '/servico/avaliar',
+      name: 'Avaliar',
+      component: Avaliar
+    },
+    {
       path: '/dashboard',
       name: 'Dashboard',
       component: Dashboard
     },
     {
-      path: '/cadastro',
+      path: '/cadastro/usuario',
       name: 'Cadastro',
       component: Cadastro
     },
@@ -45,6 +52,11 @@ export default new Router({
       path: '/servico/solicitar',
       name: 'SolitarServico',
       component: SolicitarServico
+    },
+    {
+      path:'/servico/aceitos',
+      name: 'ServicosAceitos',
+      component: ServicoAceitos
     }
   ]
 })
